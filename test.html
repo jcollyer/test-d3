@@ -1,0 +1,308 @@
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+
+</head>
+
+<style>
+#line{
+   width: 700px;
+   margin: 20px 0;
+   height: 300px;
+   background: #eee;
+ }
+ button {
+   margin: 20px 0 0 20px;
+ }
+path {
+    stroke: steelblue;
+    stroke-width: 1;
+    fill: none;
+  }
+
+  .axis {
+    shape-rendering: crispEdges;
+  }
+
+  .x.axis line {
+    stroke: lightgrey;
+  }
+
+  .x.axis .minor {
+    stroke-opacity: .5;
+  }
+
+  .x.axis path {
+    display: none;
+  }
+
+  .y.axis line, .y.axis path {
+    fill: none;
+    stroke: #000;
+  }
+
+</style>
+<body>
+
+  <div id="graph"></div>
+  <div id="line"></div>​
+
+  <script>
+    var dataArray = [10,20,50,60];
+    var w = 500;
+    var h = 500;
+
+    var widthScale = d3.scale.linear().domain([0,60]).range([0,w]);
+    var colorScale = d3.scale.linear().domain([0,60]).range(["red","blue"]);
+
+    var axis = d3.svg.axis().ticks(5).scale(widthScale);
+
+    var canvas = d3.select("body")
+                   .append("svg")
+                   .attr("width", w)
+                   .attr("height", h)
+                   .append("g")
+                   .attr("transform","translate(20,0)")
+
+    var bars = canvas.selectAll("rect")
+                     .data(dataArray)
+                     .enter()
+                        .append("rect")
+                        .attr("width", function(d){return widthScale(d); })
+                        .attr("height", 50)
+                        .attr("fill", function(d){return colorScale(d); })
+                        .attr("y", function(d,i){return i * 100});
+    canvas.append("g")
+          .attr("transform","translate(0,400)")
+          .call(axis);
+
+
+
+
+     var w = 700;
+        var h = 300;
+
+        var svg = d3.select("#line")
+          .append("svg")
+          .attr("width", w)
+          .attr("height", h)
+          .attr("id", "visualization")
+          .attr("xmlns", "http://www.w3.org/2000/svg");
+
+        var data = d3.range(11).map(function(){return Math.random()*10})
+        var x = d3.scale.linear().domain([0, 10]).range([0, 700]);
+        var y = d3.scale.linear().domain([0, 10]).range([10, 290]);
+        var line = d3.svg.line()
+          .interpolate("cardinal")
+          .x(function(d,i) {return x(i);})
+          .y(function(d) {return y(d);})
+
+        var path = svg.append("path")
+          .attr("d", line(data))
+          .attr("stroke", "steelblue")
+          .attr("stroke-width", "2")
+          .attr("fill", "none");
+
+        var totalLength = path.node().getTotalLength();
+
+        path
+          .attr("stroke-dasharray", totalLength + " " + totalLength)
+          .attr("stroke-dashoffset", totalLength)
+          .transition()
+            .duration(2000)
+            .ease("linear")
+            .attr("stroke-dashoffset", 0);
+
+        svg.on("click", function(){
+          path
+            .transition()
+            .duration(2000)
+            .ease("linear")
+            .attr("stroke-dashoffset", totalLength);
+        })
+
+
+
+
+
+      // define dimensions of graph
+         var m = [80, 80, 80, 80]; // margins
+         var w = 1000 - m[1] - m[3]; // width
+         var h = 400 - m[0] - m[2]; // height
+
+
+         // Simple data array, from first heart rate till last heart rate during the time period. This data was extracted using the php file
+         // var data = this.state.hrm_data_points;
+         var bpmData = [90,90,93,94,96,97,99,102,106,110,113,120,114,122,125,126,130,126,133,137,138,142,138,150,147,148,153,144,133,122];
+         var durationData = [];
+         // this.state.hrm_data_points.map(function(data_point){
+         //   bpmData.push(data_point.bpm);
+         //   durationData.push(data_point.duration);
+         // });
+
+
+         // debugger;
+         var padding = 50;
+
+         // X scale will fit all values from data[] within pixels 0-w
+         var x = d3.scale.linear().domain([0, bpmData.length]).range([0, w]);
+
+         // Y scale will fit values from 0-10 within pixels h-0 (Note the inverted domain for the y-scale: bigger is up!)
+         // automatically determining max range can work something like this
+         var y = d3.scale.linear().domain([d3.min(bpmData), d3.max(bpmData)]).range([h, 0]);
+
+         // create a line function that can convert bpmData[] into x and y points
+         var line = d3.svg.line()
+         // assign the X function to plot our line as we wish
+         .x(function(d,i) {
+           return x(i);
+         })
+         .y(function(d) {
+           return y(d);
+         })
+
+         // Add an SVG element with the desired dimensions and margin.
+         var graph = d3.select("#graph").append("svg:svg")
+                       .attr("width", w + m[1] + m[3])
+                       .attr("height", h + m[0] + m[2])
+                       .append("svg:g")
+                       .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+
+         // create left yAxis
+         var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
+         // Add the y-axis to the left
+         graph.append("svg:g")
+              .attr("class", "y axis")
+              .attr("transform", "translate(-25,0)")
+              .call(yAxisLeft);
+
+         var xAxisBottom = d3.svg.axis().scale(x).ticks(16).orient("bottom");
+         //    .tickFormat(format);
+         //    .ticks(d3.time.days, 1);
+
+         graph.append("svg:g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + (h) + ")")
+              .call(xAxisBottom)
+              .append("text")
+              .attr("x", w / 2)
+              .attr("y", 50)
+              .style("text-anchor", "middle")
+              .text(4 + " minutes" + " | " + bpmData.length + " total sessions" );
+
+
+         // Add the line by appending an svg:path element with the bpmData line we created above
+         // do this AFTER the axes above so that the line is above the tick-lines
+         graph.append("svg:path").attr("d", line(bpmData));
+
+
+
+
+
+          var data = [3, 6, 5, 7, 5, 2, 1, 3, 8, 9, 4, 5, 7],
+                      w = 700,
+                      h = 250,
+                      y = d3.scale.linear().domain([d3.min(data), d3.max(data)]).range([110, h - 50]),
+                      x = d3.scale.linear().domain([0, data.length - 1]).range([30, w - 30]);
+
+                      // SVG'yi oluştur
+                      var container = d3.select("body")
+                          .append("div")
+                          .attr("class", "chart-container");
+
+                      var tooltip = container
+                          .append("div")
+                          .attr("class", "chart-tooltip");
+
+                      var vis = container
+                          .append("svg:svg")
+                          .attr("width", w)
+                          .attr("height", h)
+
+                      // Group oluştur
+                      var g = vis.append("svg:g");
+
+                      // Bar ekle
+                      var barData = [4, 6, 5, 7, 5, 2, 1, 3, 8, 9, 2, 5, 7];
+                      var barY = d3.scale.linear().domain([d3.min(barData), d3.max(barData)]).range([5, 70]);
+                      var bar = g.selectAll(".bar")
+                          .data(barData)
+                          .enter().append("svg:rect")
+                          .attr("class", "bar")
+                          .attr("x", function(d, i) { return x(i) - 15 })
+                          .attr("y", function(d, i) { return h - barY(d); })
+                          .attr("width", "30px")
+                          .attr("height", "1px")
+                          .attr("height", function(d, i) { return barY(d); });
+
+                      // Line'ı oluştur
+                      var line = d3.svg.line()
+                          .interpolate("cardinal")
+                          .x(function(d, i) { return x(i); })
+                          .y(function(d) { return h - y(d); })
+
+                      // Line'ı ekle
+                      g.append("svg:path").attr("d", line(data));
+
+                      // Pointleri oluştur
+                      var points = g.selectAll(".point")
+                          .data(data)
+                          .enter().append("svg:circle")
+                          .attr("class", "point")
+                          .attr("cx", function(d, i) { return x(i) })
+                          .attr("cy", function(d, i) { return h - y(d) })
+                          .attr("r", function(d, i) { return 5 });
+
+                      // Hover etkisi için rect ekle
+                      var rect = g.selectAll(".bar-rect")
+                          .data(barData)
+                          .enter().append("svg:rect")
+                          .attr("class", "bar-rect")
+                          .attr("x", function(d, i) { return x(i) - 20 })
+                          .attr("y", 0)
+                          .attr("width", w / barData.length)
+                          .attr("height", h)
+                          .on("mousemove", function(d, i) {
+                              // Calculate left position
+                              var tooltipLeft = (x(i) + 50);
+
+                              tooltip
+                                  .html(formatTooltip(d, i))
+                                  .style("left", tooltipLeft + "px")
+                                  .style("height", (h - 20) + "px")
+                                  .style("display", "block");
+
+                              $('.bar:eq(' + i + ')').attr('class', 'bar hover');
+                              $('.point:eq(' + i + ')').attr('class', 'point hover');
+                          }).on("mouseleave", function(d, i) {
+                              tooltip
+                                  .style("display", "none");
+
+                              $('.bar:eq(' + i + ')').attr('class', 'bar');
+                              $('.point:eq(' + i + ')').attr('class', 'point');
+                          });
+
+                      function formatTooltip(d, i) {
+                          // Calculate row height
+                          var rowHeight = (h - 49) / 6;
+
+                          return '<div class="title">Test title</div>'
+                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>Imp <span class="bullet" style="background-color: #4fac66"></span> </strong> <div class="content">2,153</div></div>'
+                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>Click <span class="bullet" style="background-color: #89bdce"></span></strong> <div class="content">163</div></div>'
+                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>CTR</strong> <div class="content">%0.2423</div></div>'
+                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>CPM</strong> <div class="content">$0.24</div></div>'
+                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>CPC</strong> <div class="content">$0,62</div></div>'
+                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>CPA</strong> <div class="content">$3.15</div></div>';
+                      }
+
+
+
+  </script>
+
+</body>
+</html>
