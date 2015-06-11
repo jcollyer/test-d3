@@ -53,6 +53,8 @@ path {
   <div id="line"></div>​
 
   <script>
+
+
     var dataArray = [10,20,50,60];
     var w = 500;
     var h = 500;
@@ -82,9 +84,9 @@ path {
           .call(axis);
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-     var w = 700;
+        var w = 700;
         var h = 300;
 
         var svg = d3.select("#line")
@@ -128,7 +130,7 @@ path {
 
 
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       // define dimensions of graph
          var m = [80, 80, 80, 80]; // margins
@@ -173,6 +175,9 @@ path {
                        .append("svg:g")
                        .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
+
+
+
          // create left yAxis
          var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
          // Add the y-axis to the left
@@ -198,107 +203,19 @@ path {
 
          // Add the line by appending an svg:path element with the bpmData line we created above
          // do this AFTER the axes above so that the line is above the tick-lines
-         graph.append("svg:path").attr("d", line(bpmData));
+         var thisPath = graph.append("svg:path").attr("d", line(bpmData));
 
 
+        var totalLength = thisPath.node().getTotalLength();
 
+        thisPath
+          .attr("stroke-dasharray", totalLength + " " + totalLength)
+          .attr("stroke-dashoffset", totalLength)
+          .transition()
+            .duration(10000)
+            .ease("linear")
+            .attr("stroke-dashoffset", 0);
 
-
-          var data = [3, 6, 5, 7, 5, 2, 1, 3, 8, 9, 4, 5, 7],
-                      w = 700,
-                      h = 250,
-                      y = d3.scale.linear().domain([d3.min(data), d3.max(data)]).range([110, h - 50]),
-                      x = d3.scale.linear().domain([0, data.length - 1]).range([30, w - 30]);
-
-                      // SVG'yi oluştur
-                      var container = d3.select("body")
-                          .append("div")
-                          .attr("class", "chart-container");
-
-                      var tooltip = container
-                          .append("div")
-                          .attr("class", "chart-tooltip");
-
-                      var vis = container
-                          .append("svg:svg")
-                          .attr("width", w)
-                          .attr("height", h)
-
-                      // Group oluştur
-                      var g = vis.append("svg:g");
-
-                      // Bar ekle
-                      var barData = [4, 6, 5, 7, 5, 2, 1, 3, 8, 9, 2, 5, 7];
-                      var barY = d3.scale.linear().domain([d3.min(barData), d3.max(barData)]).range([5, 70]);
-                      var bar = g.selectAll(".bar")
-                          .data(barData)
-                          .enter().append("svg:rect")
-                          .attr("class", "bar")
-                          .attr("x", function(d, i) { return x(i) - 15 })
-                          .attr("y", function(d, i) { return h - barY(d); })
-                          .attr("width", "30px")
-                          .attr("height", "1px")
-                          .attr("height", function(d, i) { return barY(d); });
-
-                      // Line'ı oluştur
-                      var line = d3.svg.line()
-                          .interpolate("cardinal")
-                          .x(function(d, i) { return x(i); })
-                          .y(function(d) { return h - y(d); })
-
-                      // Line'ı ekle
-                      g.append("svg:path").attr("d", line(data));
-
-                      // Pointleri oluştur
-                      var points = g.selectAll(".point")
-                          .data(data)
-                          .enter().append("svg:circle")
-                          .attr("class", "point")
-                          .attr("cx", function(d, i) { return x(i) })
-                          .attr("cy", function(d, i) { return h - y(d) })
-                          .attr("r", function(d, i) { return 5 });
-
-                      // Hover etkisi için rect ekle
-                      var rect = g.selectAll(".bar-rect")
-                          .data(barData)
-                          .enter().append("svg:rect")
-                          .attr("class", "bar-rect")
-                          .attr("x", function(d, i) { return x(i) - 20 })
-                          .attr("y", 0)
-                          .attr("width", w / barData.length)
-                          .attr("height", h)
-                          .on("mousemove", function(d, i) {
-                              // Calculate left position
-                              var tooltipLeft = (x(i) + 50);
-
-                              tooltip
-                                  .html(formatTooltip(d, i))
-                                  .style("left", tooltipLeft + "px")
-                                  .style("height", (h - 20) + "px")
-                                  .style("display", "block");
-
-                              $('.bar:eq(' + i + ')').attr('class', 'bar hover');
-                              $('.point:eq(' + i + ')').attr('class', 'point hover');
-                          }).on("mouseleave", function(d, i) {
-                              tooltip
-                                  .style("display", "none");
-
-                              $('.bar:eq(' + i + ')').attr('class', 'bar');
-                              $('.point:eq(' + i + ')').attr('class', 'point');
-                          });
-
-                      function formatTooltip(d, i) {
-                          // Calculate row height
-                          var rowHeight = (h - 49) / 6;
-
-                          return '<div class="title">Test title</div>'
-                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>Imp <span class="bullet" style="background-color: #4fac66"></span> </strong> <div class="content">2,153</div></div>'
-                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>Click <span class="bullet" style="background-color: #89bdce"></span></strong> <div class="content">163</div></div>'
-                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>CTR</strong> <div class="content">%0.2423</div></div>'
-                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>CPM</strong> <div class="content">$0.24</div></div>'
-                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>CPC</strong> <div class="content">$0,62</div></div>'
-                              + '<div class="row" style="height: ' + rowHeight + 'px"><strong>CPA</strong> <div class="content">$3.15</div></div>';
-                      }
 
 
 
